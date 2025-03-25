@@ -66,13 +66,12 @@ async function run() {
       next();
     }
 
-    // user related api
+    // -----------=========== user related api ===========--------------
     app.get("/users", verifyToken, verifyAdmin, async(req, res) => {
       console.log(req.headers);
       const result = await userCollection.find().toArray();
       res.send(result);
     });
-
     app.get("/users/admin/:email", verifyToken, async(req, res) => {
       const email = req.params.email;
       if(email !== req.decoded.email) {
@@ -85,8 +84,7 @@ async function run() {
         admin = user?.role === "admin"
       }
       res.send({ admin })
-    });
-    
+    });    
     app.post("/users", async(req, res) => {
       const user = req.body;
       // insert email if user doesn`t exists:
@@ -96,7 +94,6 @@ async function run() {
       if (existingUser) {
         return res.send({message: "User already exists", insertedId: null})
       }
-
       const result = await userCollection.insertOne(user);
       res.send(result);
     });
@@ -117,24 +114,29 @@ async function run() {
       const result = await userCollection.deleteOne(query);
       res.send(result);
     });
-    // menu related apis
+
+    // ----------============ menu related apis ============--------------
     app.get("/menu", async(req, res) => {
       const result = await menuCollection.find().toArray();
       res.send(result);
     });
-
     app.post("/menu", verifyToken, verifyAdmin, async(req, res) => {
       const item = req.body;
       const result = await menuCollection.insertOne(item);
       res.send(result);
-    })
-
+    });
+    app.delete("/menu/:id", verifyToken, verifyAdmin, async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.deleteOne(query);
+      res.send(result);
+    });
     app.get("/reviews", async(req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     });
 
-    // Carts Collection
+    // -----------=========== Carts Collection ============---------------
     app.get("/carts", async(req, res) => {
       const result = await cartCollection.find().toArray();
       res.send(result);
